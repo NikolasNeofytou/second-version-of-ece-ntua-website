@@ -12,6 +12,7 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
+  emailVerified DateTime?
   image         String?
   username      String?   @unique
   onboardingCompleted Boolean @default(false)
@@ -68,6 +69,8 @@ model Profile {
   interestsRaw String   @default("") // comma separated interests
   skillsRaw    String   @default("") // comma separated skills
   visibility   String   @default("PUBLIC") // PUBLIC | STUDENTS | PRIVATE
+  avatarUrl    String?
+  bannerUrl    String?
   completeness  Int       @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import ProfileEditor from './ProfileEditor';
+import EditModeProvider from './profile-edit-mode-wrapper';
 import ProfileCompletenessBanner from './profile-completeness-banner';
 
 export default async function ProfilePage() {
@@ -10,7 +10,7 @@ export default async function ProfilePage() {
       <h1 id="profile-heading" className="text-2xl font-bold">My Profile</h1>
       {!session?.user && <p className="text-sm text-[var(--color-text-secondary)]">Please sign in to manage your profile.</p>}
       {session?.user && <ProfileCompletenessBanner />}
-      {session?.user && <ProfileEditor />}
+  {session?.user && <EditModeProvider />}
     </section>
   );
 }

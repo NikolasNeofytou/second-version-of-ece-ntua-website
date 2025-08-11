@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
-import ThemeToggle from "../components/ThemeToggle";
 import Providers from "../components/Providers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/auth";
-import SignInOut from "@/components/SignInOut";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,9 +47,17 @@ export default async function RootLayout({
                 <li><Link className="hover:text-[var(--color-text-primary)]" href="/profile">Profile</Link></li>
               </ul>
             </nav>
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              <SignInOut session={session} />
+            <div className="flex items-center gap-4">
+              {session?.user ? (
+                <Link href="/profile" className="flex items-center gap-2 text-xs px-2 py-1 rounded-md bg-[var(--color-surface-alt)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors" title="My profile">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-accent-fade)] text-[var(--color-accent)] font-semibold">
+                    {session.user.username?.[0]?.toUpperCase() || session.user.name?.[0]?.toUpperCase() || "U"}
+                  </span>
+                  <span className="max-w-[10ch] truncate text-[var(--color-text-primary)]">{session.user.username || session.user.name || 'Profile'}</span>
+                </Link>
+              ) : (
+                <Link href="/auth/signin" className="btn-primary text-xs">Sign in</Link>
+              )}
             </div>
           </header>
           <main id="main" className="px-6 py-10 max-w-5xl mx-auto w-full">{children}</main>

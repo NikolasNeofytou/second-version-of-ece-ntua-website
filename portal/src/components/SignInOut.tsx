@@ -1,5 +1,6 @@
 "use client";
-import { signIn, signOut } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
+import Link from 'next/link';
 import type { Session } from 'next-auth';
 
 export default function SignInOut({ session }: { session: Session | null }) {
@@ -9,9 +10,8 @@ export default function SignInOut({ session }: { session: Session | null }) {
       <button onClick={() => signOut()} className="btn-secondary text-xs">Sign out</button>
     </div>
   ) : (
-    <div className="flex items-center gap-1">
-      <button onClick={() => signIn('google')} className="btn-primary text-xs">Google</button>
-      <button onClick={() => signIn('linkedin')} className="btn-secondary text-xs">LinkedIn</button>
+    <div className="flex items-center gap-2">
+      <Link href="/auth/signin" className="btn-primary text-xs">Sign in</Link>
     </div>
   );
 }

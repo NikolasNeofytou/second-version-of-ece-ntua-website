@@ -38,11 +38,15 @@ if (!missing(PROVIDER_VARS.linkedin).length) {
 export const authOptions: NextAuthOptions = {
   // Fail fast if required env vars missing (prevents silent provider failure)
   adapter: PrismaAdapter(prisma),
+  pages: {
+    signIn: '/auth/signin'
+  },
   providers: [
     ...(enabledProviders.find(p => p.id === 'google') ? [GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: { params: { prompt: 'consent', access_type: 'offline', response_type: 'code' } }
+      authorization: { params: { prompt: 'consent', access_type: 'offline', response_type: 'code' } },
+      allowDangerousEmailAccountLinking: true // Enables linking to existing user with same email to avoid OAuthCreateAccount (dev convenience)
     })] : []),
     ...(enabledProviders.find(p => p.id === 'linkedin') ? [LinkedInProvider({
       clientId: process.env.LINKEDIN_CLIENT_ID!,
@@ -96,8 +100,18 @@ export const authOptions: NextAuthOptions = {
         if (t.id) su.id = t.id;
         if ('username' in t) su.username = t.username ?? null;
         if ('onboardingCompleted' in t) su.onboardingCompleted = !!t.onboardingCompleted;
-        // Hide email
         if ('email' in su) (su as unknown as { email?: string | undefined }).email = undefined;
+      }
+      try {
+        if (t.id) {
+          const existingProfile = await prisma.profile.findUnique({ where: { userId: t.id } });
+            if (!existingProfile) {
+              await prisma.profile.create({ data: { userId: t.id } });
+              console.log('[auth][profile][auto-created]', t.id);
+            }
+        }
+      } catch (e) {
+        console.warn('[auth][profile][ensure-failed]', e);
       }
       return session;
     }
