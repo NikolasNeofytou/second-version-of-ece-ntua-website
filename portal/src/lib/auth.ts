@@ -2,21 +2,60 @@ import NextAuth, { type NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import LinkedInProvider from 'next-auth/providers/linkedin';
 // Placeholder IEEE provider (not standard) -- will require custom OAuth implementation later.
-import { PrismaAdapter } from '@auth/prisma-adapter';
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 
+// --- Runtime env validation & conditional provider enabling ---
+const REQUIRED_BASE = ['NEXTAUTH_SECRET'];
+const PROVIDER_VARS: Record<string, string[]> = {
+  google: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
+  linkedin: ['LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET']
+};
+
+function missing(keys: string[]) { return keys.filter(k => !process.env[k]); }
+
+const baseMissing = missing(REQUIRED_BASE);
+if (baseMissing.length) {
+  console.error('[env][fatal] Missing required auth env vars:', baseMissing.join(', '));
+}
+
+interface EnabledProvider { name: string; id: string; }
+const enabledProviders: EnabledProvider[] = [];
+
+// Google
+if (!missing(PROVIDER_VARS.google).length) {
+  enabledProviders.push({ name: 'Google', id: 'google' });
+} else {
+  console.warn('[env][auth] Google provider disabled. Missing:', missing(PROVIDER_VARS.google).join(', '));
+}
+// LinkedIn
+if (!missing(PROVIDER_VARS.linkedin).length) {
+  enabledProviders.push({ name: 'LinkedIn', id: 'linkedin' });
+} else {
+  console.warn('[env][auth] LinkedIn provider disabled. Missing:', missing(PROVIDER_VARS.linkedin).join(', '));
+}
+
 export const authOptions: NextAuthOptions = {
+  // Fail fast if required env vars missing (prevents silent provider failure)
   adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || ''
-    }),
-    LinkedInProvider({
-      clientId: process.env.LINKEDIN_CLIENT_ID || '',
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET || ''
-    })
+    ...(enabledProviders.find(p => p.id === 'google') ? [GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: { params: { prompt: 'consent', access_type: 'offline', response_type: 'code' } }
+    })] : []),
+    ...(enabledProviders.find(p => p.id === 'linkedin') ? [LinkedInProvider({
+      clientId: process.env.LINKEDIN_CLIENT_ID!,
+      clientSecret: process.env.LINKEDIN_CLIENT_SECRET!,
+      authorization: { params: { scope: 'r_liteprofile r_emailaddress' } }
+    })] : [])
   ],
+  debug: process.env.NODE_ENV === 'development',
+  logger: {
+    error(code, metadata) { console.error('[auth][error]', code, metadata); },
+    warn(code) { console.warn('[auth][warn]', code); },
+    debug(code, metadata) { console.log('[auth][debug]', code, metadata); }
+  },
   session: { strategy: 'jwt' },
   callbacks: {
     async jwt({ token, user, trigger }) {
@@ -76,3 +115,5 @@ export const authOptions: NextAuthOptions = {
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
+
+// NOTE: Ensure GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET etc. are set in .env before starting dev server.

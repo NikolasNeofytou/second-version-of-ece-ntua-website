@@ -14,7 +14,6 @@ model User {
   email         String?   @unique
   image         String?
   username      String?   @unique
-  loweredUsername String? @unique @map("lowered_username")
   onboardingCompleted Boolean @default(false)
   // OAuth accounts relation
   accounts      Account[]

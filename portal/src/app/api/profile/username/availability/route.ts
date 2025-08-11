@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { normalizeUsername, validateUsernameFormat } from '@/lib/username';
 
-// Simple availability check (unauthenticated allowed so user can see immediately after sign-in redirect)
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const u = (searchParams.get('u') || '').trim().toLowerCase();
-  if (!u || u.length < 3) return NextResponse.json({ available: false });
-  const valid = /^[a-zA-Z0-9_]{3,30}$/.test(u);
-  if (!valid) return NextResponse.json({ available: false });
-  const existing = await prisma.user.findUnique({ where: { username: u } });
-  return NextResponse.json({ available: !existing });
+  const raw = (searchParams.get('u') || '').trim();
+  const normalized = normalizeUsername(raw);
+  const validation = validateUsernameFormat(normalized);
+  if (!validation.ok) {
+    return NextResponse.json({ available: false, error: { code: validation.code, message: validation.message } });
+  }
+  const rows = await prisma.$queryRaw<{ one: number }[]>`SELECT 1 as one FROM User WHERE username = ${normalized} LIMIT 1`;
+  return NextResponse.json({ available: rows.length === 0 });
 }
