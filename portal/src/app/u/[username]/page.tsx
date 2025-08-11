@@ -9,14 +9,16 @@ export default async function PublicProfilePage({ params }: { params: Params }) 
   if (!data) return notFound();
   const { user, profile } = data;
   if (profile.visibility === 'PRIVATE') return notFound();
-  const interests = profile.interests || [];
-  const skills = profile.skills || [];
+  const interests = (profile.interestsVisibility === 'PRIVATE') ? [] : (profile.interests || []);
+  const skills = (profile.skillsVisibility === 'PRIVATE') ? [] : (profile.skills || []);
+  const showBio = profile.bioVisibility !== 'PRIVATE';
+  const showYear = profile.yearVisibility !== 'PRIVATE';
   return (
     <div className="space-y-8 max-w-4xl" aria-labelledby="public-profile-heading">
       <div className="space-y-4">
         <h1 id="public-profile-heading" className="text-2xl font-bold">{user.username || user.name}</h1>
         <div className="flex flex-wrap gap-4 text-xs text-[var(--color-text-secondary)]">
-          {profile.year && <span>Year {profile.year}</span>}
+          {showYear && profile.year && <span>Year {profile.year}</span>}
           <span className="capitalize">{(profile.visibility || 'PUBLIC').toLowerCase()}</span>
           <span>{interests.length} interests</span>
           <span>{skills.length} skills</span>
@@ -26,7 +28,11 @@ export default async function PublicProfilePage({ params }: { params: Params }) 
         <div className="md:col-span-2 space-y-6">
           <section className="space-y-2">
             <h2 className="text-sm font-semibold tracking-wide">About</h2>
-            <p className="text-xs leading-relaxed text-[var(--color-text-secondary)] whitespace-pre-wrap min-h-16">{profile.bio?.trim() || 'No bio yet.'}</p>
+            {showBio ? (
+              <p className="text-xs leading-relaxed text-[var(--color-text-secondary)] whitespace-pre-wrap min-h-16">{profile.bio?.trim() || 'No bio yet.'}</p>
+            ) : (
+              <p className="text-[10px] text-[var(--color-text-secondary)] italic">Bio is private.</p>
+            )}
           </section>
           <section className="space-y-3">
             <h2 className="text-sm font-semibold tracking-wide">Interests</h2>

@@ -37,13 +37,15 @@ export default async function RootLayout({
               ECE NTUA Portal
             </Link>
             <nav className="flex-1">
-              <ul className="flex flex-wrap gap-6 text-sm font-medium text-[var(--color-text-secondary)]">
+              <ul className="flex flex-wrap gap-5 text-sm font-medium text-[var(--color-text-secondary)]">
                 <li><Link className="hover:text-[var(--color-text-primary)]" href="/">Home</Link></li>
+                <li><Link className="hover:text-[var(--color-text-primary)]" href="/about">About</Link></li>
+                <li><Link className="hover:text-[var(--color-text-primary)]" href="/departments">Departments</Link></li>
+                <li><Link className="hover:text-[var(--color-text-primary)]" href="/courses">Courses</Link></li>
+                <li><Link className="hover:text-[var(--color-text-primary)]" href="/research">Research</Link></li>
                 <li><Link className="hover:text-[var(--color-text-primary)]" href="/announcements">Announcements</Link></li>
-                <li><Link className="hover:text-[var(--color-text-primary)]" href="/lab-partners">Lab Partners</Link></li>
-                <li><Link className="hover:text-[var(--color-text-primary)]" href="/calendar">Calendar</Link></li>
-                <li><Link className="hover:text-[var(--color-text-primary)]" href="/past-papers">Past Papers</Link></li>
-                <li><Link className="hover:text-[var(--color-text-primary)]" href="/network">Network</Link></li>
+                <li><Link className="hover:text-[var(--color-text-primary)]" href="/resources">Resources</Link></li>
+                <li><Link className="hover:text-[var(--color-text-primary)]" href="/search">Search</Link></li>
                 <li><Link className="hover:text-[var(--color-text-primary)]" href="/profile">Profile</Link></li>
               </ul>
             </nav>

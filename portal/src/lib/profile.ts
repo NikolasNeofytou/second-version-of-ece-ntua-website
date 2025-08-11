@@ -8,7 +8,13 @@ export const profileUpdateSchema = z.object({
   skills: z.array(z.string().min(1).max(40)).max(30).optional(),
   visibility: z.enum(['PUBLIC','STUDENTS','PRIVATE']).optional(),
   avatarUrl: z.string().url().max(500).optional(),
-  bannerUrl: z.string().url().max(500).optional()
+  bannerUrl: z.string().url().max(500).optional(),
+  bioVisibility: z.enum(['PUBLIC','STUDENTS','PRIVATE']).optional(),
+  interestsVisibility: z.enum(['PUBLIC','STUDENTS','PRIVATE']).optional(),
+  skillsVisibility: z.enum(['PUBLIC','STUDENTS','PRIVATE']).optional(),
+  yearVisibility: z.enum(['PUBLIC','STUDENTS','PRIVATE']).optional(),
+  avatarVisibility: z.enum(['PUBLIC','STUDENTS','PRIVATE']).optional(),
+  bannerVisibility: z.enum(['PUBLIC','STUDENTS','PRIVATE']).optional()
 });
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
 
@@ -23,11 +29,17 @@ export function serializeProfileUpdate(data: ProfileUpdateInput) {
     skillsRaw: data.skills? join(data.skills): undefined,
   visibility: data.visibility ?? undefined,
   avatarUrl: data.avatarUrl ?? undefined,
-  bannerUrl: data.bannerUrl ?? undefined
+  bannerUrl: data.bannerUrl ?? undefined,
+  bioVisibility: data.bioVisibility ?? undefined,
+  interestsVisibility: data.interestsVisibility ?? undefined,
+  skillsVisibility: data.skillsVisibility ?? undefined,
+  yearVisibility: data.yearVisibility ?? undefined,
+  avatarVisibility: data.avatarVisibility ?? undefined,
+  bannerVisibility: data.bannerVisibility ?? undefined
   };
 }
 
-export interface RawProfileShape { interestsRaw: string; skillsRaw: string; visibility?: string | null; year?: number | null; bio?: string | null; completeness?: number | null; avatarUrl?: string | null; bannerUrl?: string | null; [k: string]: unknown }
+export interface RawProfileShape { interestsRaw: string; skillsRaw: string; visibility?: string | null; year?: number | null; bio?: string | null; completeness?: number | null; avatarUrl?: string | null; bannerUrl?: string | null; bioVisibility?: string | null; interestsVisibility?: string | null; skillsVisibility?: string | null; yearVisibility?: string | null; avatarVisibility?: string | null; bannerVisibility?: string | null; [k: string]: unknown }
 
 export function presentProfile(p: RawProfileShape) {
   return {
@@ -61,19 +73,22 @@ export async function upsertProfile(userId: string, data: ProfileUpdateInput) {
   return presentProfile(profile);
 }
 
-export function computeProfileCompleteness(input: { username?: string | null; year?: number | null; bio?: string | null; interests?: string[]; skills?: string[]; avatarUrl?: string | null; bannerUrl?: string | null }) {
-  let score = 0;
-  const checks: Array<[boolean]> = [
-    [!!input.username],
-    [!!input.year],
-    [!!(input.bio && input.bio.trim())],
-    [!!(input.interests && input.interests.length)],
-    [!!(input.skills && input.skills.length)],
-    [!!(input.avatarUrl)],
-    [!!(input.bannerUrl)]
-  ];
-  for (const [ok] of checks) if (ok) score++;
-  return Math.round((score / checks.length) * 100);
+export function computeProfileCompleteness(input: { username?: string | null; year?: number | null; bio?: string | null; interests?: string[]; skills?: string[]; avatarUrl?: string | null; bannerUrl?: string | null; bioVisibility?: string | null; interestsVisibility?: string | null; skillsVisibility?: string | null; yearVisibility?: string | null; avatarVisibility?: string | null; bannerVisibility?: string | null }) {
+  let score = 0; let total = 0;
+  function consider(vis: string | null | undefined, present: boolean) {
+    if (vis === 'PRIVATE') return; // skip from denominator
+    total++;
+    if (present) score++;
+  }
+  consider('PUBLIC', !!input.username); // username global (no field visibility flag stored on profile)
+  consider(input.yearVisibility, !!input.year);
+  consider(input.bioVisibility, !!(input.bio && input.bio.trim()));
+  consider(input.interestsVisibility, !!(input.interests && input.interests.length));
+  consider(input.skillsVisibility, !!(input.skills && input.skills.length));
+  consider(input.avatarVisibility, !!input.avatarUrl);
+  consider(input.bannerVisibility, !!input.bannerUrl);
+  if (total === 0) return 0;
+  return Math.round((score / total) * 100);
 }
 
 export async function recomputeProfileCompleteness(userId: string) {
@@ -81,16 +96,17 @@ export async function recomputeProfileCompleteness(userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId }, include: { profile: true } });
     if (!user || !user.profile) return null;
   const p = user.profile as unknown as RawProfileShape;
-  let score = 0;
-  const total = 7;
-  if (user.username) score++;
-  if (p.year) score++;
-  if (p.bio && typeof p.bio === 'string' && p.bio.trim()) score++;
-  if (p.interestsRaw && typeof p.interestsRaw === 'string' && p.interestsRaw.trim()) score++;
-  if (p.skillsRaw && typeof p.skillsRaw === 'string' && p.skillsRaw.trim()) score++;
-  if (p.avatarUrl) score++;
-  if (p.bannerUrl) score++;
-  const value = Math.round((score / total) * 100);
+    let score = 0; let total = 0;
+    function consider(vis: string | null | undefined, present: boolean) {
+      if (vis === 'PRIVATE') return; total++; if (present) score++; }
+    consider('PUBLIC', !!user.username);
+    consider(p.yearVisibility, !!p.year);
+    consider(p.bioVisibility, !!(p.bio && typeof p.bio === 'string' && p.bio.trim()));
+    consider(p.interestsVisibility, !!(p.interestsRaw && typeof p.interestsRaw === 'string' && p.interestsRaw.trim()));
+    consider(p.skillsVisibility, !!(p.skillsRaw && typeof p.skillsRaw === 'string' && p.skillsRaw.trim()));
+    consider(p.avatarVisibility, !!p.avatarUrl);
+    consider(p.bannerVisibility, !!p.bannerUrl);
+    const value = total ? Math.round((score / total) * 100) : 0;
     if (p.completeness !== value) {
       await prisma.profile.update({ where: { userId }, data: { completeness: value } });
     }
