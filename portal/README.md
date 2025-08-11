@@ -1,3 +1,36 @@
+# ECE NTUA Student Portal (App)
+
+Dark + light themed Next.js 15 application using Tailwind CSS with custom design tokens.
+
+## Stack
+- Next.js 15 (App Router, React 19)
+- Tailwind CSS + custom CSS variables for theming
+- TypeScript
+
+## Development
+```bash
+npm install
+npm run dev
+```
+Then open http://localhost:3000.
+
+## Theming
+Theme tokens live in `src/app/globals.css` under `:root[data-theme='dark']` and `:root[data-theme='light']`.
+The toggle button (`ThemeToggle`) switches the `data-theme` attribute on `<html>`.
+
+## Adding Components
+Use Tailwind utilities. For repeated patterns make small component wrappers under `src/components`.
+
+## Roadmap
+- Announcements feed (RSS ingest)
+- Lab partner matching tool
+- Calendar auto updates
+- Past exam archive with search
+- Auth (Google / IEEE) + student network area
+
+---
+Generated from create-next-app; original template docs below.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

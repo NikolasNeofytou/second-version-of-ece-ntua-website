@@ -19,3 +19,4 @@ npm run dev
 ## Inspiration
 
 The layout draws ideas from publicly shared college website templates on GitHub such as [kushkrg/College-Website-Template-using-HTML-CSS](https://github.com/kushkrg/College-Website-Template-using-HTML-CSS).
+§
