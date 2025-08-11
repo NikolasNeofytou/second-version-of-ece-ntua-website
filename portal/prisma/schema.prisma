@@ -71,6 +71,7 @@ model Profile {
   visibility   String   @default("PUBLIC") // PUBLIC | STUDENTS | PRIVATE
   avatarUrl    String?
   bannerUrl    String?
+  degreePlanJson String? // stored JSON of selected course codes & track
   bioVisibility        String @default("PUBLIC")
   interestsVisibility  String @default("PUBLIC")
   skillsVisibility     String @default("PUBLIC")
