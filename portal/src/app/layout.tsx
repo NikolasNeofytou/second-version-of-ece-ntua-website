@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import Providers from "../components/Providers";
+import EnhancedBackground from "../components/EnhancedBackground";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/auth";
 
@@ -30,6 +31,7 @@ export default async function RootLayout({
   return (
     <html lang="en" data-theme="dark" className="h-full">
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[var(--color-bg)] text-[var(--color-text-primary)]`}>
+        <EnhancedBackground />
         <Providers session={session}>
           <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-[var(--color-surface)] text-[var(--color-text-primary)] px-3 py-2 rounded-md border border-[var(--color-border)]">Skip to content</a>
           <header className="flex items-center gap-6 px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-40 backdrop-blur">

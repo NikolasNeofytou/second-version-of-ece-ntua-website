@@ -3,8 +3,14 @@
 import { useEffect, useState, useMemo } from 'react';
 const avatarVariants = [
   '/default-avatar.svg',
+  '/default-avatar-geometric-1.svg',
+  '/default-avatar-geometric-2.svg',
+  '/default-avatar-geometric-3.svg',
+  '/default-avatar-geometric-4.svg',
   '/default-avatar-circuit.svg',
-  '/default-avatar-lightning.svg'
+  '/default-avatar-lightning.svg',
+  '/default-avatar-waveform.svg',
+  '/default-avatar-transformer.svg'
 ];
 const bannerVariants = [
   '/default-banner.svg',
@@ -21,6 +27,9 @@ interface FormState {
   visibility: 'PUBLIC' | 'STUDENTS' | 'PRIVATE';
   avatarUrl?: string;
   bannerUrl?: string;
+  linkedin?: string;
+  github?: string;
+  website?: string;
   bioVisibility?: 'PUBLIC' | 'STUDENTS' | 'PRIVATE';
   interestsVisibility?: 'PUBLIC' | 'STUDENTS' | 'PRIVATE';
   skillsVisibility?: 'PUBLIC' | 'STUDENTS' | 'PRIVATE';
@@ -139,17 +148,38 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
                 <div><span className="uppercase tracking-wide text-[10px] text-[var(--color-text-secondary)]">Year</span><p className="font-medium mt-0.5">{state.year ?? '—'}</p></div>
                 <div><span className="uppercase tracking-wide text-[10px] text-[var(--color-text-secondary)]">Visibility</span><p className="font-medium mt-0.5">{state.visibility}</p></div>
               </div>
+              <div className="flex gap-3 mt-4">
+                {state.linkedin && <a href={state.linkedin} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 underline">LinkedIn</a>}
+                {state.github && <a href={state.github} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-800 underline">GitHub</a>}
+                {state.website && <a href={state.website} target="_blank" rel="noopener noreferrer" className="text-xs text-green-700 underline">Website</a>}
+              </div>
             </div>
           </div>
           <div className="flex gap-2">
             <button onClick={() => onEditingChange(true)} className="btn-primary text-xs self-start">Edit Profile</button>
             {username && <a href={`/u/${username}`} target="_blank" rel="noopener noreferrer" className="text-xs px-3 py-1 rounded-sm border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition">Public View</a>}
+            {username && (
+              <button
+                type="button"
+                className="text-xs px-3 py-1 rounded-sm border border-[var(--color-accent)] bg-[var(--color-surface)] hover:bg-[var(--color-accent)] hover:text-white transition"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/u/${username}`);
+                }}
+                aria-label="Copy public profile link"
+              >Share Profile</button>
+            )}
           </div>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
           <div className="rounded-md border border-[var(--color-border)] p-4 bg-[var(--color-surface)] md:col-span-2 flex flex-col gap-3">
             <h2 className="text-sm font-semibold tracking-wide">About</h2>
-            <p className="text-xs leading-relaxed text-[var(--color-text-secondary)] whitespace-pre-wrap min-h-16">{state.bio?.trim() || 'No bio provided yet.'}</p>
+            <textarea
+              className="text-xs leading-relaxed text-[var(--color-text-secondary)] whitespace-pre-wrap min-h-16 w-full bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded p-2"
+              value={state.bio || ''}
+              onChange={e => setState(s => ({ ...s, bio: e.target.value }))}
+              placeholder="Write something about yourself..."
+              rows={3}
+            />
           </div>
           <div className="rounded-md border border-[var(--color-border)] p-4 bg-[var(--color-surface)] flex flex-col gap-3">
             <h2 className="text-sm font-semibold tracking-wide">Snapshot</h2>
@@ -166,6 +196,13 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
               <h2 className="text-sm font-semibold tracking-wide">Interests</h2>
             </div>
             <div className="flex flex-wrap gap-2 min-h-10">
+              <input
+                type="text"
+                className="text-xs bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded p-1 w-full"
+                value={state.interests}
+                onChange={e => setState(s => ({ ...s, interests: e.target.value }))}
+                placeholder="Comma-separated interests"
+              />
               {interestList.length ? interestList.map(i => <Tag key={i} tone="interest">{i}</Tag>) : <span className="text-[10px] text-[var(--color-text-secondary)]">No interests yet.</span>}
             </div>
           </div>
@@ -174,6 +211,13 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
               <h2 className="text-sm font-semibold tracking-wide">Skills</h2>
             </div>
             <div className="flex flex-wrap gap-2 min-h-10">
+              <input
+                type="text"
+                className="text-xs bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded p-1 w-full"
+                value={state.skills}
+                onChange={e => setState(s => ({ ...s, skills: e.target.value }))}
+                placeholder="Comma-separated skills"
+              />
               {skillList.length ? skillList.map(s => <Tag key={s} tone="skill">{s}</Tag>) : <span className="text-[10px] text-[var(--color-text-secondary)]">No skills yet.</span>}
             </div>
           </div>
@@ -191,18 +235,29 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
           <button type="submit" disabled={saving} className="btn-primary text-xs disabled:opacity-50">{saving? 'Saving...':'Save'}</button>
         </div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+  <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs">
           <span>Year</span>
           <input type="number" min={1} max={10} value={state.year ?? ''} onChange={e=> setState(s=> ({...s, year: e.target.value? Number(e.target.value): undefined}))} className="px-2 py-1 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)]" />
         </label>
         <label className="flex flex-col gap-1 text-xs">
+          <span>LinkedIn</span>
+          <input type="url" value={state.linkedin || ''} onChange={e=> setState(s=> ({...s, linkedin: e.target.value}))} placeholder="https://linkedin.com/in/username" className="px-2 py-1 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)]" />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span>GitHub</span>
+          <input type="url" value={state.github || ''} onChange={e=> setState(s=> ({...s, github: e.target.value}))} placeholder="https://github.com/username" className="px-2 py-1 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)]" />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span>Website</span>
+          <input type="url" value={state.website || ''} onChange={e=> setState(s=> ({...s, website: e.target.value}))} placeholder="https://yourwebsite.com" className="px-2 py-1 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)]" />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
           <span>Visibility</span>
-          <select value={state.visibility} onChange={e=> setState(s=> ({...s, visibility: e.target.value as 'PUBLIC' | 'STUDENTS' | 'PRIVATE'}))} className="px-2 py-1 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)]">
-            <option value="PUBLIC">Public</option>
-            <option value="STUDENTS">Students</option>
-            <option value="PRIVATE">Private</option>
-          </select>
+          <div className="flex gap-2 mt-1">
+            <button type="button" onClick={()=>setState(s=>({...s, visibility: 'PUBLIC'}))} className={`px-2 py-1 rounded border text-xs ${state.visibility==='PUBLIC' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)]'}`}>Public</button>
+            <button type="button" onClick={()=>setState(s=>({...s, visibility: 'PRIVATE'}))} className={`px-2 py-1 rounded border text-xs ${state.visibility==='PRIVATE' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)]'}`}>Private</button>
+          </div>
         </label>
       </div>
       <details className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-4 space-y-4">
@@ -210,43 +265,38 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
         <div className="grid gap-4 sm:grid-cols-3 text-xs">
           <label className="flex flex-col gap-1">
             <span>Year Visibility</span>
-            <select value={state.yearVisibility} onChange={e=> setState(s=> ({...s, yearVisibility: e.target.value as 'PUBLIC' | 'STUDENTS' | 'PRIVATE'}))} className="px-2 py-1 rounded-sm bg-[var(--color-surface-alt)] border border-[var(--color-border)]">
-              <option value="PUBLIC">Public</option>
-              <option value="STUDENTS">Students</option>
-              <option value="PRIVATE">Private</option>
-            </select>
+            <div className="flex gap-2 mt-1">
+              <button type="button" onClick={()=>setState(s=>({...s, yearVisibility: 'PUBLIC'}))} className={`px-2 py-1 rounded border text-xs ${state.yearVisibility==='PUBLIC' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-primary)]'}`}>Public</button>
+              <button type="button" onClick={()=>setState(s=>({...s, yearVisibility: 'PRIVATE'}))} className={`px-2 py-1 rounded border text-xs ${state.yearVisibility==='PRIVATE' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-primary)]'}`}>Private</button>
+            </div>
           </label>
           <label className="flex flex-col gap-1">
             <span>Bio Visibility</span>
-            <select value={state.bioVisibility} onChange={e=> setState(s=> ({...s, bioVisibility: e.target.value as 'PUBLIC' | 'STUDENTS' | 'PRIVATE'}))} className="px-2 py-1 rounded-sm bg-[var(--color-surface-alt)] border border-[var(--color-border)]">
-              <option value="PUBLIC">Public</option>
-              <option value="STUDENTS">Students</option>
-              <option value="PRIVATE">Private</option>
-            </select>
+            <div className="flex gap-2 mt-1">
+              <button type="button" onClick={()=>setState(s=>({...s, bioVisibility: 'PUBLIC'}))} className={`px-2 py-1 rounded border text-xs ${state.bioVisibility==='PUBLIC' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-primary)]'}`}>Public</button>
+              <button type="button" onClick={()=>setState(s=>({...s, bioVisibility: 'PRIVATE'}))} className={`px-2 py-1 rounded border text-xs ${state.bioVisibility==='PRIVATE' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-primary)]'}`}>Private</button>
+            </div>
           </label>
           <label className="flex flex-col gap-1">
             <span>Avatar Visibility</span>
-            <select value={state.avatarVisibility} onChange={e=> setState(s=> ({...s, avatarVisibility: e.target.value as 'PUBLIC' | 'STUDENTS' | 'PRIVATE'}))} className="px-2 py-1 rounded-sm bg-[var(--color-surface-alt)] border border-[var(--color-border)]">
-              <option value="PUBLIC">Public</option>
-              <option value="STUDENTS">Students</option>
-              <option value="PRIVATE">Private</option>
-            </select>
+            <div className="flex gap-2 mt-1">
+              <button type="button" onClick={()=>setState(s=>({...s, avatarVisibility: 'PUBLIC'}))} className={`px-2 py-1 rounded border text-xs ${state.avatarVisibility==='PUBLIC' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-primary)]'}`}>Public</button>
+              <button type="button" onClick={()=>setState(s=>({...s, avatarVisibility: 'PRIVATE'}))} className={`px-2 py-1 rounded border text-xs ${state.avatarVisibility==='PRIVATE' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-primary)]'}`}>Private</button>
+            </div>
           </label>
           <label className="flex flex-col gap-1">
             <span>Banner Visibility</span>
-            <select value={state.bannerVisibility} onChange={e=> setState(s=> ({...s, bannerVisibility: e.target.value as 'PUBLIC' | 'STUDENTS' | 'PRIVATE'}))} className="px-2 py-1 rounded-sm bg-[var(--color-surface-alt)] border border-[var(--color-border)]">
-              <option value="PUBLIC">Public</option>
-              <option value="STUDENTS">Students</option>
-              <option value="PRIVATE">Private</option>
-            </select>
+            <div className="flex gap-2 mt-1">
+              <button type="button" onClick={()=>setState(s=>({...s, bannerVisibility: 'PUBLIC'}))} className={`px-2 py-1 rounded border text-xs ${state.bannerVisibility==='PUBLIC' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-primary)]'}`}>Public</button>
+              <button type="button" onClick={()=>setState(s=>({...s, bannerVisibility: 'PRIVATE'}))} className={`px-2 py-1 rounded border text-xs ${state.bannerVisibility==='PRIVATE' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-primary)]'}`}>Private</button>
+            </div>
           </label>
           <label className="flex flex-col gap-1">
             <span>Interests Visibility</span>
-            <select value={state.interestsVisibility} onChange={e=> setState(s=> ({...s, interestsVisibility: e.target.value as 'PUBLIC' | 'STUDENTS' | 'PRIVATE'}))} className="px-2 py-1 rounded-sm bg-[var(--color-surface-alt)] border border-[var(--color-border)]">
-              <option value="PUBLIC">Public</option>
-              <option value="STUDENTS">Students</option>
-              <option value="PRIVATE">Private</option>
-            </select>
+            <div className="flex gap-2 mt-1">
+              <button type="button" onClick={()=>setState(s=>({...s, interestsVisibility: 'PUBLIC'}))} className={`px-2 py-1 rounded border text-xs ${state.interestsVisibility==='PUBLIC' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-primary)]'}`}>Public</button>
+              <button type="button" onClick={()=>setState(s=>({...s, interestsVisibility: 'PRIVATE'}))} className={`px-2 py-1 rounded border text-xs ${state.interestsVisibility==='PRIVATE' ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-primary)]'}`}>Private</button>
+            </div>
           </label>
           <label className="flex flex-col gap-1">
             <span>Skills Visibility</span>
@@ -262,9 +312,18 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
       <div className="rounded-md border border-[var(--color-border)] p-4 bg-[var(--color-surface)] space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
           <label className="flex flex-col gap-1 text-xs">
-            <span>Avatar URL</span>
-            <input value={state.avatarUrl || ''} onChange={e=> setState(s=> ({...s, avatarUrl: e.target.value}))} placeholder="https://..." className="px-2 py-1 rounded-sm bg-[var(--color-surface-alt)] border border-[var(--color-border)]" />
-            <div className="flex gap-2 mt-2">
+            <span>Avatar</span>
+            <div className="flex gap-2 mt-2 items-center">
+              <input type="file" accept="image/*" onChange={e => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = ev => {
+                    setState(s => ({ ...s, avatarUrl: ev.target?.result as string }));
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }} className="text-xs" />
               {avatarVariants.map(url => (
                 <button type="button" key={url} onClick={()=>setState(s=>({...s, avatarUrl: url}))} className={`rounded-full border-2 ${state.avatarUrl===url ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'} w-10 h-10 overflow-hidden bg-[var(--color-surface-alt)]`}>
                   <img src={url} alt="avatar variant" className="object-cover w-full h-full" />
@@ -282,9 +341,18 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
             </select>
           </label>
           <label className="flex flex-col gap-1 text-xs">
-            <span>Banner URL</span>
-            <input value={state.bannerUrl || ''} onChange={e=> setState(s=> ({...s, bannerUrl: e.target.value}))} placeholder="https://..." className="px-2 py-1 rounded-sm bg-[var(--color-surface-alt)] border border-[var(--color-border)]" />
-            <div className="flex gap-2 mt-2">
+            <span>Banner</span>
+            <div className="flex gap-2 mt-2 items-center">
+              <input type="file" accept="image/*" onChange={e => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = ev => {
+                    setState(s => ({ ...s, bannerUrl: ev.target?.result as string }));
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }} className="text-xs" />
               {bannerVariants.map(url => (
                 <button type="button" key={url} onClick={()=>setState(s=>({...s, bannerUrl: url}))} className={`rounded border-2 ${state.bannerUrl===url ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'} w-24 h-10 overflow-hidden bg-[var(--color-surface-alt)]`}>
                   <img src={url} alt="banner variant" className="object-cover w-full h-full" />

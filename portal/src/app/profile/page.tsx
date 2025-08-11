@@ -17,7 +17,15 @@ export default async function ProfilePage() {
     } catch {}
   }
   return (
-    <section className="space-y-6" aria-labelledby="profile-heading">
+    <section className="space-y-6 relative min-h-screen overflow-hidden" aria-labelledby="profile-heading">
+      {/* Decorative background */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[var(--color-surface)] via-[var(--color-surface-alt)] to-[var(--color-accent)]">
+        <svg width="100%" height="100%" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0 w-full h-full">
+          <circle cx="300" cy="200" r="120" fill="var(--color-accent-alt)" fillOpacity="0.12" />
+          <rect x="900" y="600" width="180" height="180" rx="48" fill="var(--color-accent)" fillOpacity="0.08" />
+          <polygon points="600,100 700,300 500,300" fill="var(--color-accent-alt)" fillOpacity="0.10" />
+        </svg>
+      </div>
       <h1 id="profile-heading" className="text-2xl font-bold">My Profile</h1>
       {!session?.user && <p className="text-sm text-[var(--color-text-secondary)]">Please sign in to manage your profile.</p>}
       {session?.user && <ProfileCompletenessBanner />}
