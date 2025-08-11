@@ -1,6 +1,16 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState, useMemo } from 'react';
+const avatarVariants = [
+  '/default-avatar.svg',
+  '/default-avatar-circuit.svg',
+  '/default-avatar-lightning.svg'
+];
+const bannerVariants = [
+  '/default-banner.svg',
+  '/default-banner-waveform.svg',
+  '/default-banner-transformer.svg'
+];
 import Tag from '@/components/Tag';
 
 interface FormState {
@@ -254,6 +264,14 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
           <label className="flex flex-col gap-1 text-xs">
             <span>Avatar URL</span>
             <input value={state.avatarUrl || ''} onChange={e=> setState(s=> ({...s, avatarUrl: e.target.value}))} placeholder="https://..." className="px-2 py-1 rounded-sm bg-[var(--color-surface-alt)] border border-[var(--color-border)]" />
+            <div className="flex gap-2 mt-2">
+              {avatarVariants.map(url => (
+                <button type="button" key={url} onClick={()=>setState(s=>({...s, avatarUrl: url}))} className={`rounded-full border-2 ${state.avatarUrl===url ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'} w-10 h-10 overflow-hidden bg-[var(--color-surface-alt)]`}>
+                  <img src={url} alt="avatar variant" className="object-cover w-full h-full" />
+                </button>
+              ))}
+              <button type="button" onClick={()=>setState(s=>({...s, avatarUrl: avatarVariants[Math.floor(Math.random()*avatarVariants.length)]}))} className="px-2 py-1 rounded border border-[var(--color-accent)] text-xs ml-2">Shuffle</button>
+            </div>
           </label>
           <label className="flex flex-col gap-1 text-xs">
             <span>Avatar Visibility</span>
@@ -266,6 +284,14 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
           <label className="flex flex-col gap-1 text-xs">
             <span>Banner URL</span>
             <input value={state.bannerUrl || ''} onChange={e=> setState(s=> ({...s, bannerUrl: e.target.value}))} placeholder="https://..." className="px-2 py-1 rounded-sm bg-[var(--color-surface-alt)] border border-[var(--color-border)]" />
+            <div className="flex gap-2 mt-2">
+              {bannerVariants.map(url => (
+                <button type="button" key={url} onClick={()=>setState(s=>({...s, bannerUrl: url}))} className={`rounded border-2 ${state.bannerUrl===url ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'} w-24 h-10 overflow-hidden bg-[var(--color-surface-alt)]`}>
+                  <img src={url} alt="banner variant" className="object-cover w-full h-full" />
+                </button>
+              ))}
+              <button type="button" onClick={()=>setState(s=>({...s, bannerUrl: bannerVariants[Math.floor(Math.random()*bannerVariants.length)]}))} className="px-2 py-1 rounded border border-[var(--color-accent)] text-xs ml-2">Shuffle</button>
+            </div>
           </label>
           <label className="flex flex-col gap-1 text-xs">
             <span>Banner Visibility</span>

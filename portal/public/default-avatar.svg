@@ -1,0 +1,16 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" rx="32" fill="#F3F4F6"/>
+  <circle cx="64" cy="56" r="28" fill="#FFD600" stroke="#222" stroke-width="2"/>
+  <rect x="36" y="90" width="56" height="18" rx="9" fill="#222"/>
+  <path d="M44 44 L84 44 M44 44 Q64 24 84 44" stroke="#222" stroke-width="2" fill="none"/>
+  <rect x="54" y="70" width="20" height="8" rx="4" fill="#222"/>
+  <g>
+    <rect x="60" y="32" width="8" height="16" rx="4" fill="#FFD600" stroke="#222" stroke-width="2"/>
+    <rect x="62" y="28" width="4" height="8" rx="2" fill="#222"/>
+  </g>
+  <g>
+    <rect x="48" y="52" width="8" height="8" rx="4" fill="#222"/>
+    <rect x="72" y="52" width="8" height="8" rx="4" fill="#222"/>
+  </g>
+  <text x="64" y="120" text-anchor="middle" font-size="12" fill="#888">ECE</text>
+</svg>

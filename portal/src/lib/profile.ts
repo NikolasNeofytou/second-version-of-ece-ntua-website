@@ -22,20 +22,32 @@ function join(arr?: string[]) { return (arr && arr.length) ? arr.join(',') : '';
 function split(raw?: string | null): string[] { return raw? raw.split(',').map(s=>s.trim()).filter(Boolean): []; }
 
 export function serializeProfileUpdate(data: ProfileUpdateInput) {
+  // Default avatar/banner assignment
+  const avatarVariants = [
+    '/default-avatar.svg',
+    '/default-avatar-circuit.svg',
+    '/default-avatar-lightning.svg'
+  ];
+  const bannerVariants = [
+    '/default-banner.svg',
+    '/default-banner-waveform.svg',
+    '/default-banner-transformer.svg'
+  ];
+  const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
   return {
     year: data.year ?? undefined,
     bio: data.bio ?? undefined,
     interestsRaw: data.interests? join(data.interests): undefined,
     skillsRaw: data.skills? join(data.skills): undefined,
-  visibility: data.visibility ?? undefined,
-  avatarUrl: data.avatarUrl ?? undefined,
-  bannerUrl: data.bannerUrl ?? undefined,
-  bioVisibility: data.bioVisibility ?? undefined,
-  interestsVisibility: data.interestsVisibility ?? undefined,
-  skillsVisibility: data.skillsVisibility ?? undefined,
-  yearVisibility: data.yearVisibility ?? undefined,
-  avatarVisibility: data.avatarVisibility ?? undefined,
-  bannerVisibility: data.bannerVisibility ?? undefined
+    visibility: data.visibility ?? undefined,
+    avatarUrl: data.avatarUrl ?? pick(avatarVariants),
+    bannerUrl: data.bannerUrl ?? pick(bannerVariants),
+    bioVisibility: data.bioVisibility ?? undefined,
+    interestsVisibility: data.interestsVisibility ?? undefined,
+    skillsVisibility: data.skillsVisibility ?? undefined,
+    yearVisibility: data.yearVisibility ?? undefined,
+    avatarVisibility: data.avatarVisibility ?? undefined,
+    bannerVisibility: data.bannerVisibility ?? undefined
   };
 }
 

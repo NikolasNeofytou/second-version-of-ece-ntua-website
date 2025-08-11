@@ -1,0 +1,6 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="300" rx="32" fill="#F3F4F6"/>
+  <path d="M0 150 Q100 50 200 150 T400 150 T600 150 T800 150 T1000 150 T1200 150" stroke="#FFD600" stroke-width="12" fill="none"/>
+  <text x="600" y="220" text-anchor="middle" font-size="64" fill="#FFD600" font-family="monospace" font-weight="bold">ECE Waveform</text>
+  <text x="600" y="270" text-anchor="middle" font-size="32" fill="#222" font-family="monospace">NTUA</text>
+</svg>

@@ -1,0 +1,6 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" rx="32" fill="#F3F4F6"/>
+  <polygon points="64,24 88,72 72,72 80,104 40,56 56,56" fill="#FFD600" stroke="#222" stroke-width="2"/>
+  <circle cx="64" cy="64" r="40" fill="none" stroke="#FFD600" stroke-width="2"/>
+  <text x="64" y="120" text-anchor="middle" font-size="12" fill="#888">ECE Lightning</text>
+</svg>
