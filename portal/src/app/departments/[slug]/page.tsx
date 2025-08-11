@@ -1,7 +1,14 @@
 import { notFound } from 'next/navigation';
 import { departments } from '../../../lib/mock-data';
+import { seo } from '../../../lib/seo';
 
 interface Props { params: { slug: string } }
+
+export async function generateMetadata({ params }: Props) {
+  const dept = departments.find(d => d.slug === params.slug);
+  if (!dept) return {};
+  return seo(dept.name, dept.summary);
+}
 
 export default function DepartmentDetail({ params }: Props) {
   const dept = departments.find(d => d.slug === params.slug);

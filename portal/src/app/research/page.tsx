@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { researchProjects } from '../../lib/mock-data';
+import { seo } from '../../lib/seo';
+export const metadata = seo('Research', 'Student & faculty research highlights.');
 
 export default function ResearchOverview() {
   return (

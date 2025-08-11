@@ -94,3 +94,19 @@ model Connection {
 
   @@unique([aId, bId])
 }
+
+// Course catalog (initial minimal representation); extend with relations later (instructors via User, etc.)
+model Course {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  title        String
+  credits      Int
+  semester     Int
+  type         String   // CORE | ELECTIVE (enum later)
+  prerequisites String   @default("") // comma separated course codes
+  instructors   String   @default("") // comma separated instructor names or user IDs later
+  description   String
+  outcomes      String   @default("") // newline separated outcomes
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

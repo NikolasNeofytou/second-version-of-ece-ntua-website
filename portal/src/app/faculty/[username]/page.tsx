@@ -1,8 +1,15 @@
 import { notFound } from 'next/navigation';
 import { faculty } from '../../../lib/mock-data';
 import Link from 'next/link';
+import { seo } from '../../../lib/seo';
 
 interface Props { params: { username: string } }
+
+export async function generateMetadata({ params }: Props) {
+  const prof = faculty.find(f => f.username === params.username);
+  if (!prof) return {};
+  return seo(prof.name, `${prof.title} – ${prof.department}`);
+}
 
 export default function FacultyProfile({ params }: Props) {
   const prof = faculty.find(f => f.username === params.username);

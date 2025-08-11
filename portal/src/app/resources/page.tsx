@@ -1,4 +1,9 @@
-export default function ResourcesPage() {
+import { seo } from '../../lib/seo';
+import { requireAuth } from '../../lib/require-auth';
+export const metadata = seo('Resources', 'Central academic resources.');
+
+export default async function ResourcesPage() {
+  await requireAuth('/resources');
   const resources = [
     { label: 'Academic Calendar (ICS)', href: '/calendar' },
     { label: 'Past Papers Archive', href: '/past-papers' },

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+// (Client component cannot export full metadata; optional runtime head injection could be added.)
 
 export default function GlobalSearchPage() {
   const [q, setQ] = useState('');

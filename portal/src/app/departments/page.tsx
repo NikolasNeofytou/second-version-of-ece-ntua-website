@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { departments } from '../../lib/mock-data';
+import { seo } from '../../lib/seo';
+export const metadata = seo('Departments', 'Academic departments overview.');
 
 export default function DepartmentsPage() {
   return (

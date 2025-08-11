@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { faculty } from '../../lib/mock-data';
+import { seo } from '../../lib/seo';
+export const metadata = seo('Faculty', 'Faculty directory.');
 
 export default function FacultyDirectory() {
   return (

@@ -1,3 +1,6 @@
+import { seo } from '../../lib/seo';
+export const metadata = seo('Contact', 'Contact information for the department portal.');
+
 export default function ContactPage() {
   return (
     <div className="space-y-6 max-w-2xl">

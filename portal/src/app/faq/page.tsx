@@ -1,3 +1,6 @@
+import { seo } from '../../lib/seo';
+export const metadata = seo('FAQ', 'Frequently asked questions about the portal.');
+
 export default function FAQPage() {
   const faqs = [
     { q: 'How do I edit my profile?', a: 'Go to the Profile page and switch to edit mode. Field-level visibility controls are available in the Privacy panel.'},

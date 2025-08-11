@@ -1,6 +1,8 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../lib/auth';
 import { redirect } from 'next/navigation';
+import { seo } from '../../lib/seo';
+export const metadata = seo('Settings', 'Manage account and privacy settings.');
 
 export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
