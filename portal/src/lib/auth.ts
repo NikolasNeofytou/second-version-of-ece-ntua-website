@@ -9,7 +9,8 @@ import { prisma } from '@/lib/prisma';
 const REQUIRED_BASE = ['NEXTAUTH_SECRET'];
 const PROVIDER_VARS: Record<string, string[]> = {
   google: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
-  linkedin: ['LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET']
+  linkedin: ['LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET'],
+  iee: ['IEE_CLIENT_ID', 'IEE_CLIENT_SECRET'] // IEE requires either IEE_WELL_KNOWN or the trio: IEE_AUTH_URL, IEE_TOKEN_URL, IEE_USERINFO_URL
 };
 
 function missing(keys: string[]) { return keys.filter(k => !process.env[k]); }
@@ -34,6 +35,17 @@ if (!missing(PROVIDER_VARS.linkedin).length) {
 } else {
   console.warn('[env][auth] LinkedIn provider disabled. Missing:', missing(PROVIDER_VARS.linkedin).join(', '));
 }
+// IEE (custom OAuth / OIDC)
+const ieeHasCore = !missing(PROVIDER_VARS.iee).length;
+const ieeHasDiscovery = !!process.env.IEE_WELL_KNOWN;
+const ieeHasManual = !!process.env.IEE_AUTH_URL && !!process.env.IEE_TOKEN_URL && !!process.env.IEE_USERINFO_URL;
+if (ieeHasCore && (ieeHasDiscovery || ieeHasManual)) {
+  enabledProviders.push({ name: 'IEE', id: 'iee' });
+} else {
+  const coreMissing = missing(PROVIDER_VARS.iee);
+  if (coreMissing.length) console.warn('[env][auth] IEE provider disabled. Missing:', coreMissing.join(', '));
+  if (!ieeHasDiscovery && !ieeHasManual) console.warn('[env][auth] IEE provider disabled. Provide IEE_WELL_KNOWN or IEE_AUTH_URL/IEE_TOKEN_URL/IEE_USERINFO_URL');
+}
 
 export const authOptions: NextAuthOptions = {
   // Fail fast if required env vars missing (prevents silent provider failure)
@@ -53,6 +65,38 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET!,
       authorization: { params: { scope: 'r_liteprofile r_emailaddress' } }
     })] : [])
+    ,
+    // Custom IEE OAuth (OIDC preferred)
+    ...(enabledProviders.find(p => p.id === 'iee') ? [
+      {
+        id: 'iee',
+        name: 'IEE',
+        type: 'oauth',
+        wellKnown: process.env.IEE_WELL_KNOWN,
+        authorization: process.env.IEE_AUTH_URL ? { url: process.env.IEE_AUTH_URL, params: { scope: process.env.IEE_SCOPE || 'openid email profile' } } : undefined,
+        token: process.env.IEE_TOKEN_URL ? { url: process.env.IEE_TOKEN_URL } : undefined,
+        userinfo: process.env.IEE_USERINFO_URL ? { url: process.env.IEE_USERINFO_URL } : undefined,
+        clientId: process.env.IEE_CLIENT_ID,
+        clientSecret: process.env.IEE_CLIENT_SECRET,
+        profile(profile: Record<string, unknown>) {
+          const p = profile as { sub?: string; id?: string; email?: string; name?: string; preferred_username?: string; given_name?: string; family_name?: string };
+          const name = p.name || [p.given_name, p.family_name].filter(Boolean).join(' ') || p.preferred_username || 'IEE User';
+          return {
+            id: p.sub || p.id || '',
+            name,
+            email: p.email || undefined
+          };
+        }
+      } as unknown as {
+        id: string; name: string; type: 'oauth';
+        wellKnown?: string;
+        authorization?: { url: string; params?: Record<string, string> };
+        token?: { url: string };
+        userinfo?: { url: string };
+        clientId?: string; clientSecret?: string;
+        profile: (profile: Record<string, unknown>) => { id: string; name?: string; email?: string };
+      }
+    ] : [])
   ],
   debug: process.env.NODE_ENV === 'development',
   logger: {

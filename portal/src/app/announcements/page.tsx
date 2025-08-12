@@ -4,9 +4,10 @@ import ClientAnnouncements from "./ClientAnnouncements";
 
 export const revalidate = 1800;
 
-export default async function AnnouncementsPage({ searchParams }: { searchParams?: { category?: string; q?: string } }) {
-  const selectedCategory = searchParams?.category ? decodeURIComponent(searchParams.category) : undefined;
-  const query = searchParams?.q ? decodeURIComponent(searchParams.q) : '';
+export default async function AnnouncementsPage({ searchParams }: { searchParams?: Promise<{ category?: string; q?: string }> }) {
+  const sp = (await searchParams) || {};
+  const selectedCategory = sp.category ? decodeURIComponent(sp.category) : undefined;
+  const query = sp.q ? decodeURIComponent(sp.q) : '';
 
   let all: Announcement[] = [];
   let error: string | null = null;

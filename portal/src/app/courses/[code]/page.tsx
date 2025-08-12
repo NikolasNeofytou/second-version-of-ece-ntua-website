@@ -3,11 +3,12 @@ import { courses as mockCourses, Course as MockCourse } from '../../../lib/mock-
 import { getCourseByCode } from '../../../lib/courses';
 import { seo } from '../../../lib/seo';
 
-interface Props { params: { code: string } }
+interface Props { params: Promise<{ code: string }> }
 
 export async function generateMetadata({ params }: Props) {
-  let course = mockCourses.find(c => c.code === params.code) as MockCourse | undefined;
-  try { const db = await getCourseByCode(params.code); if (db) {
+  const p = await params;
+  let course = mockCourses.find(c => c.code === p.code) as MockCourse | undefined;
+  try { const db = await getCourseByCode(p.code); if (db) {
     course = { ...db, prerequisites: db.prerequisites, instructors: db.instructors, outcomes: db.outcomes } as unknown as MockCourse;
   }} catch {}
   if (!course) return {};
@@ -19,8 +20,9 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function CourseDetail({ params }: Props) {
-  let course = mockCourses.find(c => c.code === params.code) as MockCourse | undefined;
-  try { const db = await getCourseByCode(params.code); if (db) { const mapped: MockCourse = {
+  const p = await params;
+  let course = mockCourses.find(c => c.code === p.code) as MockCourse | undefined;
+  try { const db = await getCourseByCode(p.code); if (db) { const mapped: MockCourse = {
       code: db.code,
       title: db.title,
       credits: db.credits,

@@ -74,7 +74,7 @@ export default function ProfileEditor() {
         </label>
         <label className="flex flex-col gap-1 text-xs">
           <span>Visibility</span>
-          <select value={state.visibility} onChange={e=> setState(s=> ({...s, visibility: e.target.value as any}))} className="px-2 py-1 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)]">
+          <select value={state.visibility} onChange={e=> setState(s=> ({...s, visibility: e.target.value as 'PUBLIC' | 'STUDENTS' | 'PRIVATE'}))} className="px-2 py-1 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)]">
             <option value="PUBLIC">Public</option>
             <option value="STUDENTS">Students</option>
             <option value="PRIVATE">Private</option>

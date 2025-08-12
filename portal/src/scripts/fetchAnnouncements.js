@@ -2,7 +2,7 @@
    NOTE: For production, prefer an official RSS/JSON feed if available, add caching, rate limiting, and
    respect robots.txt / site policies. */
 const fetch = global.fetch || ((...args) => import('node-fetch').then(m => m.default(...args)));
-const cheerio = require('cheerio');
+import cheerio from 'cheerio';
 
 async function run() {
   const url = 'https://www.ece.ntua.gr/gr/announcements';

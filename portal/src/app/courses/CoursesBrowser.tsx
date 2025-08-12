@@ -2,6 +2,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import CourseIcon from './CourseIcon';
 import { CourseFilters } from './CourseFilters';
 
 // Example flows for integrated master (replace with real data as needed)
@@ -66,10 +67,14 @@ export function CoursesBrowser({ courses, pageSize = 10 }: Props) {
       <h2 className="text-xl font-semibold">Integrated Master Flows</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {flows.map(flow => (
-          <div key={flow.id} className="relative rounded-2xl overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg transition-transform duration-300 hover:-translate-y-1">
-            <Image src={flow.image} alt={flow.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover"/>
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/80 via-[var(--color-bg)]/40 to-transparent" />
-            <div className="relative z-10 p-6 flex flex-col h-52 justify-between">
+          <div key={flow.id} className="flow-card group">
+            <div className="bg-image">
+              <Image src={flow.image} alt={flow.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover" />
+            </div>
+            <div className="blob blob1" />
+            <div className="blob blob2" />
+            <div className="overlay" />
+            <div className="content">
               <div>
                 <h3 className="text-lg font-bold text-[var(--color-text-primary)] drop-shadow-sm">{flow.name}</h3>
                 <p className="text-xs text-[var(--color-text-secondary)] mt-2 line-clamp-3">{flow.description}</p>
@@ -79,6 +84,27 @@ export function CoursesBrowser({ courses, pageSize = 10 }: Props) {
           </div>
         ))}
       </div>
+      <style jsx>{`
+        .flow-card{
+          position: relative;
+          border-radius: 28px;
+          overflow: hidden;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+          transition: transform .3s ease, box-shadow .3s ease;
+        }
+        .flow-card:hover{ transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.10); }
+        .bg-image{ position:absolute; inset:0; }
+        .bg-image :global(img){ width:100%; height:100%; object-fit:cover; transform: scale(1.08); filter: saturate(.9) contrast(.9) brightness(.95); }
+        .overlay{ position:absolute; inset:0; background: linear-gradient(to top, var(--color-bg) 70%, transparent); opacity: .75; }
+        .content{ position:relative; z-index:2; padding: 1.25rem 1.5rem; height: 13rem; display:flex; flex-direction:column; justify-content:space-between; }
+        .blob{ position:absolute; width:140%; height:140%; left:-20%; top:-20%; filter: blur(40px); pointer-events:none; z-index:1; }
+        .blob1{ background: radial-gradient(35% 35% at 30% 30%, var(--color-accent) 0%, transparent 60%); opacity:.14; animation: float1 16s ease-in-out infinite alternate; }
+        .blob2{ background: radial-gradient(35% 35% at 70% 70%, var(--color-accent) 0%, transparent 60%); opacity:.10; animation: float2 18s ease-in-out infinite alternate; }
+        @keyframes float1 { from { transform: translate(-2%, -1%) scale(1.0) rotate(0deg); } to { transform: translate(2%, 3%) scale(1.05) rotate(8deg); } }
+        @keyframes float2 { from { transform: translate(3%, 2%) scale(1.0) rotate(0deg); } to { transform: translate(-3%, -4%) scale(1.07) rotate(-6deg); } }
+      `}</style>
 
       {/* Courses table */}
       <div className="mt-10 space-y-4">
@@ -104,7 +130,7 @@ export function CoursesBrowser({ courses, pageSize = 10 }: Props) {
               {pageItems.map(c => (
                 <tr key={c.code} className="group relative border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-alt)]/60 focus-within:bg-[var(--color-surface-alt)]/60 transition cursor-pointer" title={c.title} onClick={()=>window.location.href=`/courses/${c.code}`}>
                   <td className="py-2 px-4">
-                    <Image src={`https://source.unsplash.com/64x64/?${encodeURIComponent(c.title)}`} alt="preview" width={48} height={48} className="rounded-md object-cover border border-[var(--color-border)] shadow-sm" />
+                    <CourseIcon code={c.code} title={c.title} type={c.type} />
                   </td>
                   <td className="py-2 px-4 font-mono"><span className="group-hover:text-[var(--color-accent)]">{c.code}</span></td>
                   <td className="py-2 px-4 max-w-[420px]">

@@ -4,8 +4,9 @@ import Tag from '@/components/Tag';
 
 interface Params { username: string }
 
-export default async function PublicProfilePage({ params }: { params: Params }) {
-  const data = await getProfileByUsername(params.username.toLowerCase());
+export default async function PublicProfilePage({ params }: { params: Promise<Params> }) {
+  const p = await params;
+  const data = await getProfileByUsername(p.username.toLowerCase());
   if (!data) return notFound();
   const { user, profile } = data;
   if (profile.visibility === 'PRIVATE') return notFound();

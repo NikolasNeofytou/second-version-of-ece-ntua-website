@@ -15,7 +15,7 @@ export default async function SignInPage() {
     <main className="mx-auto max-w-sm mt-24 p-6 rounded-xl bg-[var(--color-bg-elevated)] shadow space-y-4">
       <div>
         <h1 className="text-lg font-semibold">Sign in</h1>
-        <p className="text-sm text-[var(--color-text-secondary)]">Use Google. If you see an account creation error, clear dev DB or regenerate provider secret.</p>
+  <p className="text-sm text-[var(--color-text-secondary)]">Use Google{process.env.NEXT_PUBLIC_IEE_ENABLED ? ' or IEE' : ''}. If you see an account creation error, clear dev DB or regenerate provider secret.</p>
       </div>
   <SignInButton />
       <p className="text-xs text-[var(--color-text-secondary)]">Need help? <Link href="/" className="underline">Return home</Link></p>

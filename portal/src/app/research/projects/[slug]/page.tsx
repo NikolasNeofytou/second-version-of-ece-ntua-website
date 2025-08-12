@@ -2,16 +2,18 @@ import { notFound } from 'next/navigation';
 import { researchProjects } from '../../../../lib/mock-data';
 import { seo } from '../../../../lib/seo';
 
-interface Props { params: { slug: string } }
+interface Props { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props) {
-  const proj = researchProjects.find(p => p.slug === params.slug);
+  const p = await params;
+  const proj = researchProjects.find(pj => pj.slug === p.slug);
   if (!proj) return {};
   return seo(proj.title, proj.blurb);
 }
 
-export default function ProjectDetail({ params }: Props) {
-  const proj = researchProjects.find(p => p.slug === params.slug);
+export default async function ProjectDetail({ params }: Props) {
+  const p = await params;
+  const proj = researchProjects.find(pj => pj.slug === p.slug);
   if (!proj) return notFound();
   return (
     <div className="space-y-6">

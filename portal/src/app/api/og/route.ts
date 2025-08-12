@@ -4,8 +4,9 @@ import { getProfileByUsername } from '@/lib/profile';
 
 export const runtime = 'edge';
 
-const fontSans = fetch(new URL('../../../../public/Geist-Regular.ttf', import.meta.url)).then(r=> r.arrayBuffer()).catch(()=> null);
-const fontMono = fetch(new URL('../../../../public/GeistMono-Regular.ttf', import.meta.url)).then(r=> r.arrayBuffer()).catch(()=> null);
+// Optional fonts: skip local file resolution to keep the edge route portable
+const fontSans: Promise<ArrayBuffer|null> = Promise.resolve(null);
+const fontMono: Promise<ArrayBuffer|null> = Promise.resolve(null);
 
 function gradient(seed: string) {
   let hash = 0; for (let i=0;i<seed.length;i++) hash = (hash*31 + seed.charCodeAt(i))|0; hash = Math.abs(hash);

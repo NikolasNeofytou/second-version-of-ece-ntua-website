@@ -19,15 +19,15 @@ describe('announcements utils', () => {
 
   it('filters recent 4 weeks', () => {
     const parsed = parseAnnouncements(sampleHtml, 'https://www.ece.ntua.gr');
-    const withDates = parsed.map(p => ({ ...p, dateObj: new Date(2025, 6, Number(p.date?.slice(0,2))) }));
-    const filtered = filterRecentWeeks(withDates as any, 4);
+  const withDates = parsed.map(p => ({ ...p, dateObj: new Date(2025, 6, Number(p.date?.slice(0,2))) }));
+  const filtered = filterRecentWeeks(withDates, 4);
     expect(filtered.length).toBeGreaterThan(0);
   });
 
   it('groups by ISO week', () => {
     const parsed = parseAnnouncements(sampleHtml, 'https://www.ece.ntua.gr');
-    const withDates = parsed.map(p => ({ ...p, dateObj: new Date(2025, 6, Number(p.date?.slice(0,2))) }));
-    const { groups } = groupByISOWeek(withDates as any);
+  const withDates = parsed.map(p => ({ ...p, dateObj: new Date(2025, 6, Number(p.date?.slice(0,2))) }));
+  const { groups } = groupByISOWeek(withDates);
     expect(Object.keys(groups).length).toBeGreaterThan(0);
   });
 });

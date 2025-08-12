@@ -5,6 +5,7 @@ import { useState } from 'react';
 export function SignInButton() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const ieeEnabled = Boolean(process.env.NEXT_PUBLIC_IEE_ENABLED);
 
   async function handleClick() {
     if (loading) return;
@@ -37,6 +38,15 @@ export function SignInButton() {
       >
         {loading ? 'Signing in…' : 'Continue with Google'}
       </button>
+      {ieeEnabled && (
+        <button
+          onClick={() => signIn('iee', { callbackUrl: '/' })}
+          disabled={loading}
+          className="btn-primary w-full text-xs disabled:opacity-60 bg-[var(--color-accent)] border-[var(--color-accent)] hover:bg-[var(--color-accent-hover)]"
+        >
+          Continue with IEE
+        </button>
+      )}
       {error && <p className="text-[10px] text-[var(--color-error)]" role="alert">{error}</p>}
     </div>
   );
