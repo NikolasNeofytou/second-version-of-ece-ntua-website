@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import Image from "next/image";
 import "./globals.css";
 import Providers from "../components/Providers";
 import EnhancedBackground from "../components/EnhancedBackground";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/auth";
+import { prisma } from "@/lib/prisma";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +30,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
+  let avatarUrl: string | null = null;
+  let displayName: string | null = null;
+  if (session?.user?.id) {
+    try {
+      const profile = await prisma.profile.findUnique({ where: { userId: session.user.id }, select: { avatarUrl: true } });
+      avatarUrl = profile?.avatarUrl ?? null;
+    } catch {}
+    displayName = (session.user.username || session.user.name || null) as string | null;
+  }
   return (
     <html lang="en" data-theme="dark" className="h-full">
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[var(--color-bg)] text-[var(--color-text-primary)]`}>
@@ -55,10 +66,14 @@ export default async function RootLayout({
               <div className="flex items-center gap-4">
                 {session?.user ? (
                   <Link href="/profile" className="flex items-center gap-2 text-xs px-2 py-1 rounded-md bg-[var(--color-surface-alt)] border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors" title="My profile">
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-accent-fade)] text-[var(--color-accent)] font-semibold">
-                      {session.user.username?.[0]?.toUpperCase() || session.user.name?.[0]?.toUpperCase() || "U"}
-                    </span>
-                    <span className="max-w-[10ch] truncate text-[var(--color-text-primary)]">{session.user.username || session.user.name || 'Profile'}</span>
+                    {avatarUrl ? (
+                      <Image src={avatarUrl} alt="Avatar" width={24} height={24} className="h-6 w-6 rounded-full object-cover border border-[var(--color-border)] bg-[var(--color-surface)]" />
+                    ) : (
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-accent-fade)] text-[var(--color-accent)] font-semibold">
+                        {displayName?.[0]?.toUpperCase() || "U"}
+                      </span>
+                    )}
+                    <span className="max-w-[10ch] truncate text-[var(--color-text-primary)]">{displayName || 'Profile'}</span>
                   </Link>
                 ) : (
                   <Link href="/auth/signin" className="btn-primary text-xs">Sign in</Link>

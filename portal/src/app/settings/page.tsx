@@ -12,6 +12,23 @@ export default async function SettingsPage() {
       <h1 className="text-3xl font-semibold tracking-tight">Account Settings</h1>
       <p className="text-[var(--color-text-secondary)] text-sm md:text-base">Consolidated controls for profile, privacy, and notification preferences will live here. For now edit your profile directly on the Profile page.</p>
       <section className="space-y-3">
+        <h2 className="text-xl font-medium">Profile Password</h2>
+        <p className="text-[var(--color-text-secondary)] text-sm">Optionally set a password required to view your public profile page.</p>
+        <form action="/api/profile/view-password" method="post" className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-1">
+            <label className="text-xs">Password</label>
+            <input name="password" type="password" className="px-2 py-1.5 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)]" placeholder="Leave blank to clear" />
+          </div>
+          <div className="grid gap-1">
+            <label className="text-xs">Hint (optional)</label>
+            <input name="hint" className="px-2 py-1.5 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)]" placeholder="E.g., course code or topic" />
+          </div>
+          <div className="md:col-span-2">
+            <button className="btn-primary text-xs">Save password</button>
+          </div>
+        </form>
+      </section>
+      <section className="space-y-3">
         <h2 className="text-xl font-medium">Security</h2>
         <p className="text-[var(--color-text-secondary)] text-sm">(Placeholder) Add sessions management, connected OAuth providers, passwordless options.</p>
       </section>

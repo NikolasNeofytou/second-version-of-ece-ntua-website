@@ -16,18 +16,18 @@ export default function EnhancedBackground() {
       aria-hidden="true"
     >
       {/* Glassmorphism panels */}
-      <div style={{
+    <div style={{
         position: "absolute",
         top: "10%",
         left: "5%",
         width: "30vw",
         height: "30vh",
-  background: "rgba(255,255,255,0.05)",
+  background: "rgba(16,22,30,0.45)",
         borderRadius: "2rem",
-  boxShadow: "0 6px 24px 0 rgba(31, 38, 135, 0.2)",
+  boxShadow: "0 6px 24px 0 rgba(0, 0, 0, 0.35)",
   backdropFilter: "blur(10px)",
   WebkitBackdropFilter: "blur(10px)",
-  border: "1px solid rgba(255,255,255,0.12)",
+  border: "1px solid rgba(255,255,255,0.06)",
       }} />
       <div style={{
         position: "absolute",
@@ -35,12 +35,12 @@ export default function EnhancedBackground() {
         right: "8%",
         width: "24vw",
         height: "24vh",
-  background: "rgba(255,255,255,0.06)",
+  background: "rgba(16,22,30,0.4)",
         borderRadius: "1.5rem",
-  boxShadow: "0 6px 20px 0 rgba(31, 38, 135, 0.18)",
+  boxShadow: "0 6px 20px 0 rgba(0, 0, 0, 0.3)",
   backdropFilter: "blur(8px)",
   WebkitBackdropFilter: "blur(8px)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  border: "1px solid rgba(255,255,255,0.06)",
       }} />
       {/* Bold accent card */}
       <div style={{

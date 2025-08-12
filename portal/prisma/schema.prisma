@@ -73,6 +73,9 @@ model Profile {
   avatarUrl    String?
   bannerUrl    String?
   degreePlanJson String? // stored JSON of selected course codes & track
+  // Optional visitor password protection
+  viewPasswordHash String?
+  viewPasswordHint String?
   bioVisibility        String @default("PUBLIC")
   interestsVisibility  String @default("PUBLIC")
   skillsVisibility     String @default("PUBLIC")

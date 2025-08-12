@@ -1,5 +1,6 @@
 import { prisma } from './prisma';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 
 export const profileUpdateSchema = z.object({
   year: z.number().int().min(1).max(10).optional(),
@@ -126,4 +127,27 @@ export async function recomputeProfileCompleteness(userId: string) {
   } catch {
     return null;
   }
+}
+
+// Password-protect a profile view (owner only)
+export async function setProfileViewPassword(userId: string, password: string | null, hint?: string | null) {
+  const hash = password ? await bcrypt.hash(password, 10) : null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client: any = prisma as any;
+  return client.profile.update({ where: { userId }, data: { viewPasswordHash: hash, viewPasswordHint: hint ?? null } });
+}
+
+export async function getProfileViewHint(userId: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client: any = prisma as any;
+  const p = await client.profile.findUnique({ where: { userId }, select: { viewPasswordHint: true } });
+  return p?.viewPasswordHint || null;
+}
+
+export async function verifyProfileViewPassword(userId: string, password: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client: any = prisma as any;
+  const p = await client.profile.findUnique({ where: { userId }, select: { viewPasswordHash: true } });
+  if (!p?.viewPasswordHash) return true; // not protected
+  return bcrypt.compare(password, p.viewPasswordHash);
 }
