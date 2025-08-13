@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
   { protocol: 'https', hostname: 'photos.google.com' },
   { protocol: 'https', hostname: 'play-lh.googleusercontent.com' },
+  { protocol: 'https', hostname: 'substackcdn.com' },
+  { protocol: 'https', hostname: 'cdn.substack.com' },
     ],
   },
 };

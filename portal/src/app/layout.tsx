@@ -57,6 +57,7 @@ export default async function RootLayout({
                   <li><Link className="hover:text-[var(--color-text-primary)]" href="/departments">Departments</Link></li>
                   <li><Link className="hover:text-[var(--color-text-primary)]" href="/courses">Courses</Link></li>
                   <li><Link className="hover:text-[var(--color-text-primary)]" href="/research">Research</Link></li>
+                  <li><Link className="hover:text-[var(--color-text-primary)]" href="/blog">Blog</Link></li>
                   <li><Link className="hover:text-[var(--color-text-primary)]" href="/announcements">Announcements</Link></li>
                   <li><Link className="hover:text-[var(--color-text-primary)]" href="/resources">Resources</Link></li>
                   <li><Link className="hover:text-[var(--color-text-primary)]" href="/search">Search</Link></li>
