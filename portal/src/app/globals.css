@@ -99,3 +99,9 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* subtle entrance animation for content blocks */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-up { opacity: 0; transform: translateY(8px); animation: revealUp .35s ease-out both; }
+  @keyframes revealUp { to { opacity: 1; transform: translateY(0); } }
+}

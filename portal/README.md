@@ -14,6 +14,21 @@ npm run dev
 ```
 Then open http://localhost:3000.
 
+## Google Photos integration (optional)
+To enable selecting photos from your Google Photos albums:
+- Create a Google Cloud OAuth 2.0 Client (Web) and add authorized redirect URL: http://localhost:3000/api/auth/callback/google
+- Add env vars in `.env`:
+	- GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+	- NEXTAUTH_SECRET
+- Ensure your Google Cloud project has the Photos Library API enabled.
+- Sign in with Google from /auth/signin.
+
+Photos page: /photos
+- It lists your albums and lets you browse items in an album.
+- Optionally lock to a single album by setting in `.env`:
+	- NEXT_PUBLIC_GOOGLE_PHOTOS_ALBUM_ID=<albumId>
+	- NEXT_PUBLIC_GOOGLE_PHOTOS_LOCK=1
+
 ## Theming
 Theme tokens live in `src/app/globals.css` under `:root[data-theme='dark']` and `:root[data-theme='light']`.
 The toggle button (`ThemeToggle`) switches the `data-theme` attribute on `<html>`.

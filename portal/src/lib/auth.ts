@@ -57,7 +57,8 @@ export const authOptions: NextAuthOptions = {
     ...(enabledProviders.find(p => p.id === 'google') ? [GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: { params: { prompt: 'consent', access_type: 'offline', response_type: 'code' } },
+      // Request offline access and Photos Library read scope so we can list media in a specific album.
+      authorization: { params: { prompt: 'consent', access_type: 'offline', response_type: 'code', scope: 'openid email profile https://www.googleapis.com/auth/photoslibrary.readonly' } },
       allowDangerousEmailAccountLinking: true // Enables linking to existing user with same email to avoid OAuthCreateAccount (dev convenience)
     })] : []),
     ...(enabledProviders.find(p => p.id === 'linkedin') ? [LinkedInProvider({

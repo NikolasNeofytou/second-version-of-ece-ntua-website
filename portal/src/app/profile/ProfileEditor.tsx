@@ -1,6 +1,8 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState, useMemo } from 'react';
+import Card from '@/components/Card';
+import Cropper from 'react-easy-crop';
 const avatarVariants = [
   '/default-avatar.svg',
   '/default-avatar-geometric-1.svg',
@@ -49,6 +51,34 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<FormState>({ interests: '', skills: '', visibility: 'PUBLIC' });
   const [statusMsg, setStatusMsg] = useState('');
+  const [bioExpanded, setBioExpanded] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [dragOver, setDragOver] = useState<'none'|'avatar'|'banner'>('none');
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropKind, setCropKind] = useState<'avatar'|'banner'|null>(null);
+  const [cropSrc, setCropSrc] = useState<string>('');
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+
+  function openCrop(kind: 'avatar'|'banner') {
+    const src = kind === 'avatar' ? state.avatarUrl : state.bannerUrl;
+    if (!src) return;
+    setCropKind(kind);
+    setCropSrc(src);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+    setCropOpen(true);
+  }
+  async function applyCrop() {
+    if (!cropKind || !cropSrc || !croppedAreaPixels) { setCropOpen(false); return; }
+    try {
+      const out = await getCroppedImg(cropSrc, croppedAreaPixels);
+      setState(s => cropKind === 'avatar' ? { ...s, avatarUrl: out } : { ...s, bannerUrl: out });
+    } catch { /* ignore */ }
+    setCropOpen(false);
+  }
 
   useEffect(() => {
     let active = true;
@@ -121,9 +151,38 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
   }
   const interestList = useMemo(() => state.interests.split(',').map(s=>s.trim()).filter(Boolean), [state.interests]);
   const skillList = useMemo(() => state.skills.split(',').map(s=>s.trim()).filter(Boolean), [state.skills]);
-  if (loading) return <p className="text-sm text-[var(--color-text-secondary)]">Loading...</p>;
+  if (loading) {
+    return (
+      <div className="space-y-6 max-w-3xl animate-pulse" aria-hidden>
+        <div className="relative w-full h-32 rounded-md overflow-hidden border border-[var(--color-border)]" style={{ background: 'var(--skeleton)' }} />
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="rounded-md h-28" style={{ background: 'var(--skeleton)' }} />
+          <div className="rounded-md h-28" style={{ background: 'var(--skeleton)' }} />
+          <div className="rounded-md h-28" style={{ background: 'var(--skeleton)' }} />
+        </div>
+      </div>
+    );
+  }
 
   if (!editing) {
+    // Helper to render limited tags with +N more
+    const renderTagList = (items: string[], tone: 'interest' | 'skill') => {
+      const limit = 10;
+      const visible = items.slice(0, limit);
+      const hidden = items.length - visible.length;
+      return (
+        <div className="flex flex-wrap gap-2 min-h-10">
+          {visible.length ? visible.map(v => <Tag key={v} tone={tone}>{v}</Tag>) : <span className="text-[10px] text-[var(--color-text-secondary)]">No {tone === 'interest' ? 'interests' : 'skills'} yet.</span>}
+          {hidden > 0 && (
+            <span className="text-[10px] px-2 py-1 rounded-sm border border-[var(--color-border)] bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)]">+{hidden} more</span>
+          )}
+        </div>
+      );
+    };
+
+    const bio = (state.bio || '').trim();
+    const bioShort = bio.length > 240 && !bioExpanded ? bio.slice(0, 240) + '…' : bio || 'No bio yet.';
+
     return (
       <div className="space-y-6 max-w-3xl" aria-live="polite">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -134,6 +193,7 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-[10px] text-[var(--color-text-secondary)]">No banner</div>
               )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
               <div className="absolute -bottom-6 left-4 w-16 h-16 rounded-full border-2 border-[var(--color-surface)] overflow-hidden bg-[var(--color-surface-alt)] shadow">
                 {state.avatarUrl ? (
                   <img src={state.avatarUrl} alt="Avatar" className="object-cover w-full h-full" />
@@ -148,9 +208,9 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
                 <div><span className="uppercase tracking-wide text-[10px] text-[var(--color-text-secondary)]">Visibility</span><p className="font-medium mt-0.5">{state.visibility}</p></div>
               </div>
               <div className="flex gap-3 mt-4">
-                {state.linkedin && <a href={state.linkedin} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 underline">LinkedIn</a>}
-                {state.github && <a href={state.github} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-800 underline">GitHub</a>}
-                {state.website && <a href={state.website} target="_blank" rel="noopener noreferrer" className="text-xs text-green-700 underline">Website</a>}
+                {state.linkedin && <a href={state.linkedin} target="_blank" rel="noopener noreferrer" className="text-xs underline hover:text-[var(--color-accent)]">LinkedIn</a>}
+                {state.github && <a href={state.github} target="_blank" rel="noopener noreferrer" className="text-xs underline hover:text-[var(--color-accent)]">GitHub</a>}
+                {state.website && <a href={state.website} target="_blank" rel="noopener noreferrer" className="text-xs underline hover:text-[var(--color-accent)]">Website</a>}
               </div>
             </div>
           </div>
@@ -163,45 +223,40 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
                 className="text-xs px-3 py-1 rounded-sm border border-[var(--color-accent)] bg-[var(--color-surface)] hover:bg-[var(--color-accent)] hover:text-white transition"
                 onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/u/${username}`);
+                  setShareCopied(true);
+                  window.setTimeout(() => setShareCopied(false), 1200);
                 }}
                 aria-label="Copy public profile link"
-              >Share Profile</button>
+              >{shareCopied ? 'Copied!' : 'Share Profile'}</button>
             )}
           </div>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="rounded-md border border-[var(--color-border)] p-4 bg-[var(--color-surface)] md:col-span-2 flex flex-col gap-3">
-            <h2 className="text-sm font-semibold tracking-wide">About</h2>
-            <p className="text-xs leading-relaxed text-[var(--color-text-secondary)] whitespace-pre-wrap min-h-16">
-              {state.bio?.trim() || 'No bio yet.'}
-            </p>
-          </div>
-          <div className="rounded-md border border-[var(--color-border)] p-4 bg-[var(--color-surface)] flex flex-col gap-3">
-            <h2 className="text-sm font-semibold tracking-wide">Snapshot</h2>
+        <div className="grid gap-6 md:grid-cols-3 reveal-up">
+          <Card className="md:col-span-2" title="About" interactive={false}>
+            <div className="text-xs leading-relaxed text-[var(--color-text-secondary)] whitespace-pre-wrap min-h-16">
+              {bioShort}
+            </div>
+            {bio.length > 240 && (
+              <button type="button" onClick={() => setBioExpanded(v => !v)} className="text-[10px] underline mt-2 self-start">
+                {bioExpanded ? 'Show less' : 'Show more'}
+              </button>
+            )}
+          </Card>
+          <Card title="Snapshot" interactive={false}>
             <ul className="text-[10px] space-y-1 text-[var(--color-text-secondary)]">
               <li>Profile visibility: <span className="font-medium text-[var(--color-text-primary)]">{state.visibility}</span></li>
               <li>Interests: <span className="font-medium text-[var(--color-text-primary)]">{interestList.length}</span></li>
               <li>Skills: <span className="font-medium text-[var(--color-text-primary)]">{skillList.length}</span></li>
             </ul>
-          </div>
+          </Card>
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-md border border-[var(--color-border)] p-4 bg-[var(--color-surface)] flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold tracking-wide">Interests</h2>
-            </div>
-            <div className="flex flex-wrap gap-2 min-h-10">
-              {interestList.length ? interestList.map(i => <Tag key={i} tone="interest">{i}</Tag>) : <span className="text-[10px] text-[var(--color-text-secondary)]">No interests yet.</span>}
-            </div>
-          </div>
-          <div className="rounded-md border border-[var(--color-border)] p-4 bg-[var(--color-surface)] flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold tracking-wide">Skills</h2>
-            </div>
-            <div className="flex flex-wrap gap-2 min-h-10">
-              {skillList.length ? skillList.map(s => <Tag key={s} tone="skill">{s}</Tag>) : <span className="text-[10px] text-[var(--color-text-secondary)]">No skills yet.</span>}
-            </div>
-          </div>
+        <div className="grid gap-6 md:grid-cols-2 reveal-up">
+          <Card title="Interests" interactive={false}>
+            {renderTagList(interestList, 'interest')}
+          </Card>
+          <Card title="Skills" interactive={false}>
+            {renderTagList(skillList, 'skill')}
+          </Card>
         </div>
       </div>
     );
@@ -293,7 +348,20 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
         <div className="grid md:grid-cols-2 gap-4">
           <label className="flex flex-col gap-1 text-xs">
             <span>Avatar</span>
-            <div className="flex gap-2 mt-2 items-center">
+            <div
+              className={`flex gap-2 mt-2 items-center rounded-sm ${dragOver==='avatar' ? 'outline outline-2 outline-[var(--color-accent)]/50' : ''}`}
+              onDragOver={(e)=>{e.preventDefault(); setDragOver('avatar');}}
+              onDragLeave={()=> setDragOver('none')}
+              onDrop={(e)=>{
+                e.preventDefault(); setDragOver('none');
+                const file = e.dataTransfer.files?.[0];
+                if (file && file.type.startsWith('image/')) {
+                  const reader = new FileReader();
+                  reader.onload = ev => setState(s => ({ ...s, avatarUrl: ev.target?.result as string }));
+                  reader.readAsDataURL(file);
+                }
+              }}
+            >
               <input type="file" accept="image/*" onChange={e => {
                 const file = e.target.files?.[0];
                 if (file) {
@@ -310,6 +378,7 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
                 </button>
               ))}
               <button type="button" onClick={()=>setState(s=>({...s, avatarUrl: avatarVariants[Math.floor(Math.random()*avatarVariants.length)]}))} className="px-2 py-1 rounded border border-[var(--color-accent)] text-xs ml-2">Shuffle</button>
+              <button type="button" disabled={!state.avatarUrl} onClick={()=>openCrop('avatar')} className="px-2 py-1 rounded border border-[var(--color-border)] text-xs ml-2 disabled:opacity-50">Crop</button>
             </div>
           </label>
           <label className="flex flex-col gap-1 text-xs">
@@ -321,7 +390,20 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
           </label>
           <label className="flex flex-col gap-1 text-xs">
             <span>Banner</span>
-            <div className="flex gap-2 mt-2 items-center">
+            <div
+              className={`flex gap-2 mt-2 items-center rounded-sm ${dragOver==='banner' ? 'outline outline-2 outline-[var(--color-accent)]/50' : ''}`}
+              onDragOver={(e)=>{e.preventDefault(); setDragOver('banner');}}
+              onDragLeave={()=> setDragOver('none')}
+              onDrop={(e)=>{
+                e.preventDefault(); setDragOver('none');
+                const file = e.dataTransfer.files?.[0];
+                if (file && file.type.startsWith('image/')) {
+                  const reader = new FileReader();
+                  reader.onload = ev => setState(s => ({ ...s, bannerUrl: ev.target?.result as string }));
+                  reader.readAsDataURL(file);
+                }
+              }}
+            >
               <input type="file" accept="image/*" onChange={e => {
                 const file = e.target.files?.[0];
                 if (file) {
@@ -338,6 +420,7 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
                 </button>
               ))}
               <button type="button" onClick={()=>setState(s=>({...s, bannerUrl: bannerVariants[Math.floor(Math.random()*bannerVariants.length)]}))} className="px-2 py-1 rounded border border-[var(--color-accent)] text-xs ml-2">Shuffle</button>
+              <button type="button" disabled={!state.bannerUrl} onClick={()=>openCrop('banner')} className="px-2 py-1 rounded border border-[var(--color-border)] text-xs ml-2 disabled:opacity-50">Crop</button>
             </div>
           </label>
           <label className="flex flex-col gap-1 text-xs">
@@ -359,7 +442,8 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
       </div>
       <label className="flex flex-col gap-1 text-xs">
         <span>Bio</span>
-        <textarea value={state.bio} onChange={e=> setState(s=> ({...s, bio: e.target.value}))} rows={4} className="px-2 py-1 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)] resize-y" />
+  <textarea value={state.bio} onChange={e=> setState(s=> ({...s, bio: e.target.value}))} rows={4} maxLength={1000} className="px-2 py-1 rounded-sm bg-[var(--color-surface)] border border-[var(--color-border)] resize-y" />
+  <span className="text-[9px] text-[var(--color-text-secondary)] self-end">{(state.bio?.length||0)}/1000</span>
       </label>
   <TagEditor label="Interests" value={state.interests} onChange={v=> setState(s=> ({...s, interests: v}))} placeholder="Add an interest" tone="interest" />
       <div className="flex flex-col gap-1 text-xs max-w-sm">
@@ -407,6 +491,35 @@ export default function ProfileEditor({ editing, onEditingChange, username }: Pr
         {error && <span className="text-[10px] text-[var(--color-error)]">{error}</span>}
         {statusMsg && <span id="profile-status" className="text-[10px] text-[var(--color-success)]" aria-live="polite">{statusMsg}</span>}
       </div>
+      {/* Cropper Modal */}
+      {cropOpen && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60" onClick={()=>setCropOpen(false)} />
+          <div className="relative z-10 w-[90vw] max-w-2xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md shadow-md p-4 space-y-3">
+            <h3 className="text-sm font-semibold">Crop {cropKind === 'avatar' ? 'Avatar' : 'Banner'}</h3>
+            <div className="relative w-full h-[50vh] bg-[var(--color-surface-alt)] rounded-sm overflow-hidden">
+              <Cropper
+                image={cropSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={cropKind === 'avatar' ? 1 : 3}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={(_, areaPixels)=> setCroppedAreaPixels(areaPixels)}
+                objectFit="cover"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <input type="range" min={1} max={3} step={0.1} value={zoom} onChange={e=> setZoom(parseFloat(e.target.value))} className="w-full" />
+              <span className="text-[10px] text-[var(--color-text-secondary)]">{zoom.toFixed(1)}x</span>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={()=>setCropOpen(false)} className="text-xs px-3 py-1 rounded-sm border border-[var(--color-border)] bg-[var(--color-surface)]">Cancel</button>
+              <button type="button" onClick={applyCrop} className="btn-primary text-xs">Apply</button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
@@ -459,4 +572,32 @@ function TagEditor({ label, value, onChange, placeholder, tone }: TagEditorProps
       <p className="text-[9px] text-[var(--color-text-secondary)]">Press Enter to add. Click a chip to remove.</p>
     </div>
   );
+}
+
+// Canvas-based crop export
+async function getCroppedImg(imageSrc: string, pixelCrop: { x: number; y: number; width: number; height: number }): Promise<string> {
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = imageSrc;
+  });
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('No 2D context');
+  canvas.width = pixelCrop.width;
+  canvas.height = pixelCrop.height;
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height
+  );
+  return canvas.toDataURL('image/png');
 }
